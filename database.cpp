@@ -1,18 +1,12 @@
 #include "database.h"
 
 database_interface::database_interface() {
-	this->connection = mongocxx::client{ mongocxx::uri {"mongodb://localhost:27017"} };
+	this->connection = mongocxx::client{ mongocxx::uri {"mongodb+srv://AntonFrantsen:123@schedule.7262yqm.mongodb.net/?retryWrites=true&w=majority"} };
 	this->db = this->connection["schedule"];
 }
 
 void database_interface::insert_collection(std::string collection_name, std::string data) {
 	mongocxx::collection collection = this->db[collection_name];
-	/*std::ifstream file_to_load(data_abs_path);
-	
-	std::string strh, str_json;
-	while (getline(file_to_load, strh)) {
-		str_json += strh;
-	}*/
 
 	bsoncxx::document::value document = bsoncxx::from_json(data);
 	std::vector<bsoncxx::document::value> docs;
@@ -59,18 +53,23 @@ std::string database_interface::query_collection(std::string collection_name) {
 
 void database_interface::add_comment(std::string collection_name, std::string day, std::string class_num, std::string comment) {
 	mongocxx::collection collection = this->db[collection_name];
-	std::string subfield_k;
-	subfield_k = subfield_k + class_num + "." + "comment";
-	bsoncxx::builder::basic::document subfields;
-	subfields.append(kvp(subfield_k, comment));
-
-	bsoncxx::builder::basic::document update;
-	update.append(
-		kvp("$set", subfields)
+	collection.update_one(
+		make_document(kvp("day", day), kvp("array.number", class_num)),
+		make_document(
+			kvp("$set", make_document(kvp("array.$.Comment", comment)))
+		)
 	);
+}
 
-	auto result = collection.update_one(
-		make_document(kvp("day", day)),
-		update.view()
-	);
+void database_interface::drop_schedule(std::string collection_name_1, std::string collection_name_2) {
+	mongocxx::collection collection_1 = this->db[collection_name_1];
+	collection_1.delete_many({});
+
+	mongocxx::collection collection_2 = this->db[collection_name_2];
+	collection_2.delete_many({});
+}
+
+void database_interface::drop_schedule(std::string collection_name) {
+	mongocxx::collection collection_1 = this->db[collection_name];
+	collection_1.delete_many({});
 }

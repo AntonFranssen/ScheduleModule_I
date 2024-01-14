@@ -77,8 +77,24 @@ http::message_generator Server_interface::handle_request(http::request<Body, htt
 					response.keep_alive(response.keep_alive());
 					return response;
 				}
+				else if (request_tokens[1] == "drop") {
+					if (request_tokens.size() == 3) {
+						mongo_schedule_db.drop_schedule(request_tokens[2]);
+					}
+					else {
+						mongo_schedule_db.drop_schedule("odd", "even");
+					}
+					http::response<http::string_body> response{
+						http::status::ok, request.version(),
+					};
+					response.set(http::field::server, "RedArmy.il");
+					response.body() = "it is all OK!";
+					response.prepare_payload();
+					response.keep_alive(response.keep_alive());
+					return response;
+				}
 				else {
-					throw Bad_request_error{ request.version(), request.keep_alive(), "Bad request" };
+					throw Internal_server_error{ request.version(), request.keep_alive(), "OOPS! The developer is probably a dummy :3" };
 				}
 			}
 			break;

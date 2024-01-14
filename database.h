@@ -34,6 +34,8 @@ public:
 	std::string query_collection(std::string collection_name);
 
 	void add_comment(std::string collection_name, std::string day, std::string class_num, std::string comment);
+	void drop_schedule(std::string collection_name_1, std::string collection_name_2);
+	void drop_schedule(std::string collection_name);
 };
 
 #endif
