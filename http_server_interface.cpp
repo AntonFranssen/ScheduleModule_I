@@ -139,10 +139,6 @@ void Server_interface::accept_connections() {
 		connections_acceptor.accept(new_connection);
 		std::cout << "Connected:" << new_connection.remote_endpoint() << std::endl;
 
-		/*std::thread thr([&] {
-			manage_session(std::move(new_connection));
-			});*/
-
 		std::thread thr(&Server_interface::manage_session, this, std::move(new_connection));
 		thr.detach();
 	}
